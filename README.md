@@ -1,4 +1,3 @@
-A collection of PineScript v6 user manual documentation along with TradingView's help articles.
 # PineScript v6 Documentation Collection
 
 This repository contains a comprehensive collection of documentation resources for PineScript version 6, including:
