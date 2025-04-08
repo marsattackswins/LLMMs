@@ -1,0 +1,5 @@
+For example, the screenshot shows 38 analysts' yearly consensus price prediction for NASDAQ:AAPL on November 28, 2022.
+
+Forecast data is available for a number of symbols from the following exchanges: ADX, AMEX, ASX, ATHEX, BAHRAIN, BCBA, BCS, BER, BET, BIST, BME, BMFBOVESPA, BMV, BSE, BVB, BVC, BVL, BX, CSE, DFM, DUS, EGX, EURONEXT, FSE, FWB, GPW, HAM, HAN, HKEX, HNX, HOSE, IDX, JSE, KRX, LSE, LSIN, LUXSE, MIL, MUN, MYX, NAG, NASDAQ, NEO, NGM, NSE, NSENG, NYSE, NZX, OMXCOP, OMXHEX, OMXSTO, OMXTSE, OSL, OTC, PSE, QSE, SAPSE, SET, SGX, SIX, SSE, SWB, SZSE, TADAWUL, TASE, TPEX, TSE, TSX, TSXV, TWSE, UPCOM, XETR.
+
+Remember that the forecast is not an investment recommendation or a guide to action. In investments and trading, you should not make any decisions without your own evaluation of the instrument.

@@ -1,0 +1,5 @@
+This error occurs if a Pine script executes too many unique _request.\*()_ function calls. Whether a _request.\*()_ call is unique depends on its specified context (symbol, timeframe, and modifiers), its expression, and the scope from which it executes. Each unique _request.\*()_ call consumes extra computational resources, because it fetches another dataset into memory and runs extra computations on that data. Therefore, Pine limits the number of unique requests allowed for any script. 
+
+If you have a non-professional plan, your scripts can execute no more than 40 unique data requests. If you upgrade to a [Professional plan](https://www.tradingview.com/pricing/?status=pro), whether Expert or Ultimate, your Pine v6 scripts can execute up to 64 unique requests. 
+
+Alternatively, if you can access the script's source code, you can try to rewrite the code to reduce the total number of unique requests and ensure the script stays within your plan's limit. To learn more about how _request.\*()_ functions work and how to use them, see our User Manual's [Other timeframes and data](https://www.tradingview.com/pine-script-docs/concepts/other-timeframes-and-data/) page.

@@ -1,0 +1,1 @@
+The overall profit or loss (in the selected currency) achieved by the trading strategy in the test period. The value is the sum of all values from the Profit column (on the List of Trades tab), taking into account the sign.

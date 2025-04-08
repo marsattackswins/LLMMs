@@ -1,0 +1,1 @@
+The identifier of the order used to open or close the trade. An identifier is a string value assigned to the id argument of one of the following functions: strategy.entry, strategy.order, strategy.exit, strategy.close and strategy.close\_all.

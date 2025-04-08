@@ -1,0 +1,1 @@
+Select market data provided by [ICE Data Services](https://www.theice.com/market-data) Select reference data provided by FactSet. Copyright © 2025 FactSet Research Systems Inc. © 2025 TradingView, Inc.
