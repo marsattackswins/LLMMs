@@ -34,4 +34,4 @@ Contributions are welcome! Please feel free to:
 
 ## License
 
-This documentation collection is provided under the MIT License. See the LICENSE file for details.
+This documentation collection is provided under the GNU General Public License v3.0. See the LICENSE file for details.
