@@ -1,5 +1,5 @@
 //@version=6
-indicator("Trend Lines MAWS", shorttitle= "TL MAWS", max_lines_count = 500, max_labels_count = 500, overlay = true)
+indicator("TrendLines_MAWS", shorttitle= "TL_MAWS", max_lines_count = 500, max_labels_count = 500, overlay = true)
 
 //------------------------------------------------------------------------------
 //Settings
