@@ -18,8 +18,8 @@ anglA  = input.float (    0.1  ,'Only Trendlines between:',         minval =0.1,
 anglB  = input.float (   90    ,           ' - '          ,         minval =0.1, inline= 'angle', group=        "Angles"        ) 
 upCss  = input.color (#25c12b,           'Up'           ,                                       group=       "Colours"        ) 
 dnCss  = input.color (#f23645,          'Down'          ,                                       group=       "Colours"        ) 
-width  = input.int(3, "Line Thickness", minval=1, maxval=4, group="Colours")
-
+width  = input.int(2, "Line Thickness", minval=1, maxval=4, group="Colours")
+ 
 //-----------------------------------------------------------------------------}
 //Variables
 //-----------------------------------------------------------------------------{
