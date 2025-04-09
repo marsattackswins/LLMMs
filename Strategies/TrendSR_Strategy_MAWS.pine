@@ -1,0 +1,221 @@
+//@version=6
+strategy("Trend & SR Strategy MAWS", overlay=true, max_lines_count=500, max_labels_count=500)
+
+// ==========================================
+// Inputs
+// ==========================================
+
+// Trend Lines Parameters
+tl_length = input.int(50, "Trend Line Length", minval=2, group="Trend Lines")
+tl_source = input.string("close", "Break Source", options=["close", "H/L"], group="Trend Lines")
+tl_min_bars = input.int(3, "Minimum Bars for Break", minval=0, group="Trend Lines")
+tl_angle_min = input.float(0.1, "Min Angle", minval=0.1, group="Trend Lines")
+tl_angle_max = input.float(90, "Max Angle", minval=0.1, group="Trend Lines")
+tl_ratio = input.float(3, "Ratio X-Y axis", step=0.1, group="Trend Lines")
+
+// Support/Resistance Parameters
+sr_period = input.int(20, "Pivot Period", minval=4, maxval=30, group="Support/Resistance")
+sr_src = input.string("High/Low", "Source", options=["High/Low", "Close/Open"], group="Support/Resistance")
+sr_channel_width = input.int(10, "Channel Width %", minval=1, group="Support/Resistance")
+sr_strength = input.int(2, "Minimum SR Strength", minval=1, maxval=10, group="Support/Resistance")
+
+// Strategy Parameters
+use_trend_breaks = input.bool(true, "Use Trend Line Breaks", group="Strategy")
+use_sr_breaks = input.bool(true, "Use S/R Breaks", group="Strategy")
+require_both = input.bool(false, "Require Both Signals", group="Strategy")
+risk_percent = input.float(1.0, "Risk Per Trade %", minval=0.1, maxval=100.0, step=0.1, group="Risk Management")
+atr_periods = input.int(14, "ATR Periods", minval=1, group="Risk Management")
+
+// ==========================================
+// Trend Lines Logic
+// ==========================================
+
+n = bar_index
+bg = chart.bg_color
+fg = chart.fg_color
+
+// Variables for trend lines
+var int phx1 = na
+var float phslope = na
+var float phy1 = na
+var float upper = na
+var float plotH = na
+var bool isOnH = false
+
+var int plx1 = na
+var float plslope = na
+var float ply1 = na
+var float lower = na
+var float plotL = na
+var bool isOnL = false
+
+// Pivot calculations
+ph = ta.pivothigh(tl_length, tl_length)
+pl = ta.pivotlow(tl_length, tl_length)
+
+// Function to calculate slope and angle
+calculate_slope(x1, x2, y1, y2) => 
+    bars = 500
+    height = bars / tl_ratio
+    Xaxis = math.min(math.max(1, n), bars)
+    Yaxis = ta.highest(Xaxis) - ta.lowest(Xaxis)
+    
+    diffX = x2 - x1
+    diffY = y2 - y1
+    diffY_to_Yaxis = Yaxis / diffY
+    normalised_slope = (height / diffY_to_Yaxis) / diffX
+    slope = diffY / diffX
+    angle = math.round(math.atan(normalised_slope) * 180 / math.pi, 2)
+    [normalised_slope, slope, angle]
+
+// Calculate slopes for both high and low pivots on each bar
+[_, ph_slope, ph_angle] = calculate_slope(phx1, n-tl_length, phy1, ph)
+[_, pl_slope, pl_angle] = calculate_slope(plx1, n-tl_length, ply1, pl)
+
+// Process trend lines
+if not na(ph)
+    if ph < phy1 and math.abs(ph_angle) > tl_angle_min and math.abs(ph_angle) < tl_angle_max
+        phslope := ph_slope
+        isOnH := true
+        upper := ph + ph_slope * tl_length
+    phy1 := ph
+    phx1 := n-tl_length
+
+if not na(pl)
+    if pl > ply1 and pl_angle > tl_angle_min and pl_angle < tl_angle_max
+        plslope := pl_slope
+        isOnL := true
+        lower := pl + pl_slope * tl_length
+    ply1 := pl
+    plx1 := n-tl_length
+
+// Update trend lines
+upper += phslope
+lower += plslope
+
+// Detect breaks
+srcBl = tl_source == "close" ? close : high
+srcBr = tl_source == "close" ? close : low
+
+trendline_bull = not na(upper) and srcBl > upper and srcBl[1] <= upper[1]
+trendline_bear = not na(lower) and srcBr < lower and srcBr[1] >= lower[1]
+
+// ==========================================
+// Support/Resistance Logic
+// ==========================================
+
+float src1 = sr_src == "High/Low" ? high : math.max(close, open)
+float src2 = sr_src == "High/Low" ? low : math.min(close, open)
+float sr_ph = ta.pivothigh(src1, sr_period, sr_period)
+float sr_pl = ta.pivotlow(src2, sr_period, sr_period)
+
+var pivotvals = array.new_float(0)
+
+if (not na(sr_ph)) or (not na(sr_pl))
+    array.unshift(pivotvals, not na(sr_ph) ? sr_ph : sr_pl)
+    if array.size(pivotvals) > 20
+        array.pop(pivotvals)
+
+get_sr_vals(ind) =>
+    float lo = array.size(pivotvals) > ind ? array.get(pivotvals, ind) : na
+    float hi = lo
+    int numpp = 0
+    prdhighest = ta.highest(300)
+    prdlowest = ta.lowest(300)
+    cwidth = (prdhighest - prdlowest) * sr_channel_width / 100
+    
+    if not na(lo)
+        for y = 0 to array.size(pivotvals) - 1
+            float cpp = array.get(pivotvals, y)
+            float wdth = cpp <= lo ? hi - cpp : cpp - lo
+            if wdth <= cwidth
+                if cpp <= hi
+                    lo := math.min(lo, cpp)
+                else
+                    hi := math.max(hi, cpp)
+                numpp += 1
+    [hi, lo, numpp]
+
+var sr_up_level = array.new_float(0)
+var sr_dn_level = array.new_float(0)
+var sr_strength_arr = array.new_float(0)
+
+// Always calculate S/R values for the first 20 potential pivot points
+var max_pivots_to_check = 20
+var sr_values = array.new_bool(max_pivots_to_check, false)
+
+// Initialize arrays to store S/R values for each potential pivot
+var sr_hi_values = array.new_float(max_pivots_to_check, na)
+var sr_lo_values = array.new_float(max_pivots_to_check, na)
+var sr_strength_values = array.new_float(max_pivots_to_check, na)
+
+// Always calculate S/R values for all potential pivot indices on each bar
+for i = 0 to max_pivots_to_check - 1
+    [hi, lo, strength] = get_sr_vals(i)
+    array.set(sr_hi_values, i, hi)
+    array.set(sr_lo_values, i, lo)
+    array.set(sr_strength_values, i, float(strength))
+    array.set(sr_values, i, strength >= sr_strength and not na(hi))
+
+// Process S/R levels
+if (not na(sr_ph)) or (not na(sr_pl))
+    array.clear(sr_up_level)
+    array.clear(sr_dn_level)
+    array.clear(sr_strength_arr)
+    
+    for i = 0 to max_pivots_to_check - 1
+        if array.get(sr_values, i)
+            array.push(sr_up_level, array.get(sr_hi_values, i))
+            array.push(sr_dn_level, array.get(sr_lo_values, i))
+            array.push(sr_strength_arr, array.get(sr_strength_values, i))
+
+// Detect S/R breaks
+sr_break_up = false
+sr_break_down = false
+
+if array.size(sr_up_level) > 0
+    for i = 0 to array.size(sr_up_level) - 1
+        mid = math.round_to_mintick((array.get(sr_up_level, i) + array.get(sr_dn_level, i)) / 2)
+        if close[1] <= mid and close > mid
+            sr_break_up := true
+        if close[1] >= mid and close < mid
+            sr_break_down := true
+
+// ==========================================
+// Strategy Logic
+// ==========================================
+
+// ATR for position sizing
+atr = ta.atr(atr_periods)
+
+// Entry signals
+both_signals_long = trendline_bull and sr_break_up
+both_signals_short = trendline_bear and sr_break_down
+
+trend_only_long = use_trend_breaks and not use_sr_breaks and trendline_bull
+trend_only_short = use_trend_breaks and not use_sr_breaks and trendline_bear
+
+sr_only_long = not use_trend_breaks and use_sr_breaks and sr_break_up
+sr_only_short = not use_trend_breaks and use_sr_breaks and sr_break_down
+
+long_signal = require_both ? both_signals_long : (trend_only_long or sr_only_long)
+short_signal = require_both ? both_signals_short : (trend_only_short or sr_only_short)
+
+// Position sizing
+risk_amount = (risk_percent / 100) * strategy.equity
+position_size = risk_amount / atr
+
+// Execute trades
+if long_signal
+    strategy.entry("Long", strategy.long, qty=position_size)
+
+if short_signal
+    strategy.entry("Short", strategy.short, qty=position_size)
+
+// Plot signals for visualization
+plotshape(long_signal, "Long Signal", shape.triangleup, location.belowbar, color.green, size=size.small)
+plotshape(short_signal, "Short Signal", shape.triangledown, location.abovebar, color.red, size=size.small)
+
+// Plot trend lines
+plot(upper, "Resistance", color.red, 1, plot.style_linebr)
+plot(lower, "Support", color.green, 1, plot.style_linebr) 
