@@ -1,5 +1,5 @@
 //@version=6
-indicator("Trend Lines MAWS", shorttitle= "TL MAWS", max_lines_count = 500, max_labels_count = 500, overlay = true)
+indicator("TrendLines_MAWS", shorttitle= "TL_MAWS", max_lines_count = 500, max_labels_count = 500, overlay = true)
 
 //------------------------------------------------------------------------------
 //Settings
@@ -18,6 +18,8 @@ anglA  = input.float (    0.1  ,'Only Trendlines between:',         minval =0.1,
 anglB  = input.float (   90    ,           ' - '          ,         minval =0.1, inline= 'angle', group=        "Angles"        ) 
 upCss  = input.color (#25c12b,           'Up'           ,                                       group=       "Colours"        ) 
 dnCss  = input.color (#f23645,          'Down'          ,                                       group=       "Colours"        ) 
+bullBreakCss = input.color (#25c12b, "Bullish Break Color",                                    group=       "Break Colors"   )
+bearBreakCss = input.color (#f23645, "Bearish Break Color",                                    group=       "Break Colors"   )
 width  = input.int(2, "Line Thickness", minval=1, maxval=4, group="Colours")
  
 //-----------------------------------------------------------------------------}
@@ -155,17 +157,16 @@ plot(plotL, 'Up Trendline'
 plotshape(
   bs_H > count and srcBl > upper and srcBl[1] <= upper[1]
   , 'Bullish break'
-  , shape.labelup 
-  , location.belowbar
-  , dnCss
+  , shape.triangleup , location.belowbar
+  , bullBreakCss
   , size = size.tiny)
 
 plotshape(
   bs_L > count and srcBr < lower and srcBr[1] >= lower[1]
   , 'Bearish break'
-  , shape.labeldown 
+  , shape.triangledown 
   , location.abovebar
-  , upCss
+  , bearBreakCss
   , size = size.tiny)
 
 //-----------------------------------------------------------------------------}
