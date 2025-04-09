@@ -16,9 +16,12 @@ showA  = input.bool  (  true   ,       'show Angles'                            
 ratio  = input.float (    3    ,     'Ratio X-Y axis'     ,           step =0.1                 , group=        "Angles"        )
 anglA  = input.float (    0.1  ,'Only Trendlines between:',         minval =0.1, inline= 'angle', group=        "Angles"        ) 
 anglB  = input.float (   90    ,           ' - '          ,         minval =0.1, inline= 'angle', group=        "Angles"        ) 
-upCss  = input.color (#2962ff,           'Up'           ,                                       group=       "Colours"        ) 
+upCss  = input.color (#25c12b,           'Up'           ,                                       group=       "Colours"        ) 
 dnCss  = input.color (#f23645,          'Down'          ,                                       group=       "Colours"        ) 
-
+bullBreakCss = input.color (#25c12b, "Bullish Break Color",                                    group=       "Break Colors"   )
+bearBreakCss = input.color (#f23645, "Bearish Break Color",                                    group=       "Break Colors"   )
+width  = input.int(2, "Line Thickness", minval=1, maxval=4, group="Colours")
+ 
 //-----------------------------------------------------------------------------}
 //Variables
 //-----------------------------------------------------------------------------{
@@ -88,7 +91,7 @@ if not na(ph)
             if not broken        
                 phslope := slope, isOnH := true, upper := ph + slope * length
                 line.new(phx1, phy1, n, ph + slope * length
-                 , color= dnCss, style= line.style_dotted)
+                 , color= dnCss, style= line.style_dotted, width=width)
                 if showA
                     label.new(phx1, phy1, text= str.tostring(angle)
                      , style      = label.style_label_down
@@ -121,7 +124,7 @@ if not na(pl)
             if not broken
                 plslope := slope, isOnL := true, lower := pl + slope * length
                 line.new(plx1, ply1, n, pl + slope * length
-                 , color= upCss, style= line.style_dotted)
+                 , color= upCss, style= line.style_dotted, width=width)
                 if showA            
                     label.new(plx1, ply1, text= str.tostring(angle) 
                      , style      = label.style_label_up  
@@ -156,7 +159,7 @@ plotshape(
   , 'Bullish break'
   , shape.labelup 
   , location.belowbar
-  , dnCss
+  , bullBreakCss
   , size = size.tiny)
 
 plotshape(
@@ -164,7 +167,7 @@ plotshape(
   , 'Bearish break'
   , shape.labeldown 
   , location.abovebar
-  , upCss
+  , bearBreakCss
   , size = size.tiny)
 
 //-----------------------------------------------------------------------------}
