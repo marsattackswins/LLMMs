@@ -1,4 +1,4 @@
-# PineScript v6 Documentation Collection
+# PineScript v6 Development Hub
 
 This repository contains a comprehensive collection of documentation resources for PineScript version 6, the latest iteration of TradingView's proprietary programming language designed specifically for creating custom technical indicators and trading strategies.
 
