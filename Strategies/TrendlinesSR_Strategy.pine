@@ -1,5 +1,5 @@
 //@version=6
-strategy("TrendlinesSR_Strategy", shorttitle="TL_SR_STRAT", overlay=true, max_lines_count=500, max_labels_count=500, default_qty_type=strategy.percent_of_equity, default_qty_value=100, initial_capital=10000, currency=currency.NONE)
+strategy("TrendlinesSR_Strategy", shorttitle="TLSR", overlay=true, max_lines_count=500, max_labels_count=500, default_qty_type=strategy.percent_of_equity, default_qty_value=100, initial_capital=10000, currency=currency.NONE)
 
 // Date Range Inputs
 startDate = input.time(timestamp("2022-01-01"), "Start Date")
@@ -34,6 +34,12 @@ maxnumpp = input.int(20, "Maximum Number of Pivot", minval=5, maxval=100, group=
 ChannelW = input.int(10, "Maximum Channel Width %", minval=1, group="SR Setup")
 maxnumsr = input.int(6, "Maximum Number of S/R", minval=1, maxval=10, group="SR Setup")
 min_strength = input.int(1, "Minimum Strength", minval=1, maxval=10, group="SR Setup")
+
+// Calculate channel width early
+prdhighest = ta.highest(300)
+prdlowest = ta.lowest(300)
+var float cwidth = na
+cwidth := (prdhighest - prdlowest) * ChannelW / 100
 
 //-----------------------------------------------------------------------------
 // TrendLines Variables
@@ -195,10 +201,6 @@ float src1 = ppsrc == "High/Low" ? high : math.max(close, open)
 float src2 = ppsrc == "High/Low" ? low : math.min(close, open)
 float sr_ph = ta.pivothigh(src1, prd, prd)
 float sr_pl = ta.pivotlow(src2, prd, prd)
-
-prdhighest = ta.highest(300)
-prdlowest = ta.lowest(300)
-cwidth = (prdhighest - prdlowest) * ChannelW / 100
 
 if (not na(sr_ph)) or (not na(sr_pl))
     array.unshift(pivotvals, not na(sr_ph) ? sr_ph : sr_pl)
