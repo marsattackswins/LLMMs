@@ -1,106 +1,97 @@
 //@version=6
-strategy("TrendlinesSR_Strategy", shorttitle="TLSR", overlay=true, max_lines_count=500, max_labels_count=500, default_qty_type=strategy.percent_of_equity, default_qty_value=100, initial_capital=10000, currency=currency.NONE)
+strategy("TL_SR Strategy MAWS", shorttitle="TL_SR_MAWS", overlay=true, max_lines_count=500, max_labels_count=500, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=100, process_orders_on_close=true)
 
 // Date Range Inputs
-startDate = input.time(timestamp("2022-01-01"), "Start Date")
-endDate = input.time(timestamp("2028-12-31"), "End Date")
+start_date = input.time(timestamp("2022-01-01"), "Start Date")
+end_date = input.time(timestamp("2028-12-31"), "End Date")
 
 //------------------------------------------------------------------------------
 // TrendLines Settings
 //-----------------------------------------------------------------------------{
-NN = "Disabled"
-AB = "Point A - Point B"
-AC = "Point A - Current bar"
-length = input.int(50, minval=2, group="Swings")
-toggle = input.string(NN, "Check breaks between:", options=[AB, AC, NN], group="Trendline validation")
-source = input.string("close", "source (breaks)", options=["close", "H/L"], group="Trendline validation")
-count = input.int(3, "Minimal bars", minval=0, group="Trendline breaks", tooltip="Uninterrupted Trendline for at least x bars")
-showA = input.bool(true, "show Angles", group="Angles")
-ratio = input.float(3, "Ratio X-Y axis", step=0.1, group="Angles")
-anglA = input.float(0.1, "Only Trendlines between:", minval=0.1, inline="angle", group="Angles")
-anglB = input.float(90, " - ", minval=0.1, inline="angle", group="Angles")
-upCss = input.color(#25c12b, "Up", group="Colours")
-dnCss = input.color(#f23645, "Down", group="Colours")
-bullBreakCss = input.color(#25c12b, "Bullish Break Color", group="Break Colors")
-bearBreakCss = input.color(#f23645, "Bearish Break Color", group="Break Colors")
-width = input.int(2, "Line Thickness", minval=1, maxval=4, group="Colours")
+NN     = "Disabled"
+AB     = "Point A - Point B"
+AC     = "Point A - Current bar"
+length = input.int   (   50    ,                                    minval =          2         , group=        "Swings"        )
+toggle = input.string(   NN    ,  'Check breaks between:' ,         options=  [  AB, AC, NN  ]  , group= "Trendline validation" )
+source = input.string( "close" ,     'source (breaks)'    ,         options=  ["close", "H/L"]  , group= "Trendline validation" )
+count  = input.int   (    3    ,       'Minimal bars'     ,         minval =          0         , group=   "Trendline breaks"   
+                                                          ,         tooltip=       'Uninterrupted Trendline for at least x bars') 
+showA  = input.bool  (  true   ,       'show Angles'                                            , group=        "Angles"        )
+ratio  = input.float (    3    ,     'Ratio X-Y axis'     ,           step =0.1                 , group=        "Angles"        )
+anglA  = input.float (    0.1  ,'Only Trendlines between:',         minval =0.1, inline= 'angle', group=        "Angles"        ) 
+anglB  = input.float (   90    ,           ' - '          ,         minval =0.1, inline= 'angle', group=        "Angles"        ) 
 
-//------------------------------------------------------------------------------
 // Support/Resistance Settings
-//------------------------------------------------------------------------------
-prd = input.int(20, "Pivot Period", minval=4, maxval=30, group="SR Setup")
-ppsrc = input.string("High/Low", "SR Source", options=["High/Low", "Close/Open"], group="SR Setup")
-maxnumpp = input.int(20, "Maximum Number of Pivot", minval=5, maxval=100, group="SR Setup")
-ChannelW = input.int(10, "Maximum Channel Width %", minval=1, group="SR Setup")
-maxnumsr = input.int(6, "Maximum Number of S/R", minval=1, maxval=10, group="SR Setup")
-min_strength = input.int(1, "Minimum Strength", minval=1, maxval=10, group="SR Setup")
+prd = input.int(defval=20, title='Pivot Period', minval=4, maxval=30, group='S/R Setup')
+ppsrc = input.string(defval='High/Low', title='Source', options=['High/Low', 'Close/Open'], group='S/R Setup')
+maxnumpp = input.int(defval=20, title=' Maximum Number of Pivot', minval=5, maxval=100, group='S/R Setup')
+ChannelW = input.int(defval=10, title='Maximum Channel Width %', minval=1, group='S/R Setup')
+maxnumsr = input.int(defval=6, title=' Maximum Number of S/R', minval=1, maxval=10, group='S/R Setup')
+min_strength = input.int(defval=1, title=' Minimum Strength', minval=1, maxval=10, group='S/R Setup')
 
-// Calculate channel width early
-prdhighest = ta.highest(300)
-prdlowest = ta.lowest(300)
-var float cwidth = na
-cwidth := (prdhighest - prdlowest) * ChannelW / 100
-
-//-----------------------------------------------------------------------------
-// TrendLines Variables
-//-----------------------------------------------------------------------------
-var int phx1 = na
+//-----------------------------------------------------------------------------}
+//TrendLines Variables
+//-----------------------------------------------------------------------------{
+var int   phx1    = na
 var float phslope = na
-var float phy1 = na
-var float upper = na
-var float plotH = na
-var bool isOnH = false
+var float phy1    = na
+var float upper   = na
+var float plotH   = na
+var bool  isOnH   = false
 
-var int plx1 = na
+var int   plx1    = na
 var float plslope = na
-var float ply1 = na
-var float lower = na
-var float plotL = na
-var bool isOnL = false
+var float ply1    = na
+var float lower   = na
+var float plotL   = na
+var bool  isOnL   = false
 
 var line testLine = line.new(na, na, na, na, color=color.new(color.blue, 100))
 
 var bool phslope_changed = false
 var bool plslope_changed = false
 
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------}
 // Support/Resistance Variables
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------{
 var pivotvals = array.new_float(0)
 var sr_up_level = array.new_float(0)
 var sr_dn_level = array.new_float(0)
 sr_strength = array.new_float(0)
 
-//-----------------------------------------------------------------------------
-// Common Calculations
-//-----------------------------------------------------------------------------
-n = bar_index
-bg = chart.bg_color
-fg = chart.fg_color
-ph = ta.pivothigh(length, length)
-pl = ta.pivotlow(length, length)
-bars = 500
-height = bars / ratio
+// Calculate cwidth here, before it's used in functions
+prdhighest = ta.highest(300)
+prdlowest = ta.lowest(300)
+var float cwidth = 0.0
+cwidth := (prdhighest - prdlowest) * ChannelW / 100
+
+//-----------------------------------------------------------------------------}
+//TrendLines Calculations
+//-----------------------------------------------------------------------------{
+n     = bar_index
+bg    = chart.bg_color
+fg    = chart.fg_color
+ph    = ta.pivothigh  (length, length)
+pl    = ta.pivotlow   (length, length)
+bars  = 500 
+height = bars  /  ratio
 Xaxis = math.min(math.max(1, n), bars)
 Yaxis = ta.highest(Xaxis) - ta.lowest(Xaxis)
 srcBl = source == "close" ? close : high
 srcBr = source == "close" ? close : low
 
-//-----------------------------------------------------------------------------
-// TrendLines Functions
-//-----------------------------------------------------------------------------
-calculate_slope(x1, x2, y1, y2) =>
+calculate_slope(x1, x2, y1, y2) => 
     diffX = x2 - x1
     diffY = y2 - y1
-    diffY_to_Yaxis = Yaxis / diffY
+    diffY_to_Yaxis   =  Yaxis  / diffY
     normalised_slope = (height / diffY_to_Yaxis) / diffX
-    slope = diffY / diffX
+    slope            =           diffY           / diffX
     angle = math.round(math.atan(normalised_slope) * 180 / math.pi, 2)
     [normalised_slope, slope, angle]
 
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------}
 // Support/Resistance Functions
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------{
 get_sr_vals(ind) =>
     float lo = array.get(pivotvals, ind)
     float hi = lo
@@ -108,7 +99,7 @@ get_sr_vals(ind) =>
     for y = 0 to array.size(pivotvals) - 1
         float cpp = array.get(pivotvals, y)
         float wdth = cpp <= lo ? hi - cpp : cpp - lo
-        if wdth <= cwidth
+        if wdth <= cwidth  
             if cpp <= hi
                 lo := math.min(lo, cpp)
             else
@@ -138,51 +129,51 @@ check_sr(hi, lo, strength) =>
             break
     ret
 
-//-----------------------------------------------------------------------------
-// Strategy Logic
-//-----------------------------------------------------------------------------
-// TrendLines Logic
+//-----------------------------------------------------------------------------}
+//Strategy Logic Implementation
+//-----------------------------------------------------------------------------{
+// TrendLines Processing
 if not na(ph)
     if ph < phy1
-        [normalised_slope, slope, angle] = calculate_slope(phx1, n-length, phy1, ph)
+        [normalised_slope, slope, angle]= calculate_slope(phx1, n-length, phy1, ph)
         testLine.set_xy1(phx1, phy1)
-        testLine.set_xy2(n, ph + slope * length)
-        src = source == "close" ? close : high
+        testLine.set_xy2(n, ph + slope * length)        
+        src    = source == "close" ? close : high
         isOnH := false
         broken = false
         if math.abs(angle) > anglA and math.abs(angle) < anglB
             if toggle != NN
-                for i = (toggle == AB ? length : 0) to n - phx1
-                    if src[i] > testLine.get_price(n - i)
-                        broken := true
+                for i  = (toggle == AB ? length : 0) to n - phx1 
+                    if   src[i]   > testLine.get_price(n - i)
+                        broken   := true
                         break
-            if not broken
+            if not broken        
                 phslope := slope
                 isOnH := true
                 upper := ph + slope * length
-
+    
     phy1 := ph
     phx1 := n-length
 
 phslope_changed := ta.change(phslope) != 0
 upper += phslope
-plotH := not na(ph) and phslope_changed ? na : srcBl[1] > upper[1] ? na : upper
-bs_H = ta.barssince(na(plotH))
+plotH := not na(ph) and phslope_changed ? na : srcBl[1] > upper[1] ? na : upper 
+bs_H   = ta.barssince(na(plotH))
 
 if not na(pl)
     if pl > ply1
-        [normalised_slope, slope, angle] = calculate_slope(plx1, n-length, ply1, pl)
+        [normalised_slope, slope, angle]= calculate_slope(plx1, n-length, ply1, pl)
         testLine.set_xy1(plx1, ply1)
-        testLine.set_xy2(n, pl + slope * length)
-        src = source == "close" ? close : low
+        testLine.set_xy2(n, pl + slope * length)        
+        src    = source == "close" ? close : low
         isOnL := false
         broken = false
         if angle > anglA and angle < anglB
             if toggle != NN
-                for i = (toggle == AB ? length : 0) to n - plx1
-                    if src[i] < testLine.get_price(n - i)
-                        broken := true
-                        break
+                for i  = (toggle == AB ? length : 0) to n - plx1 
+                    if   src[i]   < testLine.get_price(n - i)
+                        broken   := true
+                        break        
             if not broken
                 plslope := slope
                 isOnL := true
@@ -194,11 +185,11 @@ if not na(pl)
 plslope_changed := ta.change(plslope) != 0
 lower += plslope
 plotL := not na(pl) and plslope_changed ? na : srcBr[1] < lower[1] ? na : lower
-bs_L = ta.barssince(na(plotL))
+bs_L   = ta.barssince(na(plotL))
 
-// Support/Resistance Logic
-float src1 = ppsrc == "High/Low" ? high : math.max(close, open)
-float src2 = ppsrc == "High/Low" ? low : math.min(close, open)
+// Support/Resistance Processing
+float src1 = ppsrc == 'High/Low' ? high : math.max(close, open)
+float src2 = ppsrc == 'High/Low' ? low : math.min(close, open)
 float sr_ph = ta.pivothigh(src1, prd, prd)
 float sr_pl = ta.pivotlow(src2, prd, prd)
 
@@ -224,43 +215,41 @@ if (not na(sr_ph)) or (not na(sr_pl))
                     array.pop(sr_up_level)
                     array.pop(sr_dn_level)
 
-//-----------------------------------------------------------------------------
-// Entry Conditions
-//-----------------------------------------------------------------------------
-inDateRange = time >= startDate and time <= endDate
+// Trading Conditions
+bool trendline_bull = bs_H > count and srcBl > upper and srcBl[1] <= upper[1]
+bool trendline_bear = bs_L > count and srcBr < lower and srcBr[1] >= lower[1]
 
-// Bullish signals
-bullish_trendline = bs_H > count and srcBl > upper and srcBl[1] <= upper[1]
-bullish_sr = false
-if array.size(sr_up_level) > 0
-    for x = 0 to array.size(sr_up_level) - 1
+f_crossed_over() =>
+    ret = false
+    for x = 0 to array.size(sr_up_level) > 0 ? array.size(sr_up_level) - 1 : na
         float mid = math.round_to_mintick((array.get(sr_up_level, x) + array.get(sr_dn_level, x)) / 2)
         if close[1] <= mid and close > mid
-            bullish_sr := true
-            break
+            ret := true
+    ret
 
-// Bearish signals
-bearish_trendline = bs_L > count and srcBr < lower and srcBr[1] >= lower[1]
-bearish_sr = false
-if array.size(sr_up_level) > 0
-    for x = 0 to array.size(sr_up_level) - 1
+f_crossed_under() =>
+    ret = false
+    for x = 0 to array.size(sr_up_level) > 0 ? array.size(sr_up_level) - 1 : na
         float mid = math.round_to_mintick((array.get(sr_up_level, x) + array.get(sr_dn_level, x)) / 2)
         if close[1] >= mid and close < mid
-            bearish_sr := true
-            break
+            ret := true
+    ret
 
-// Entry rules
-if inDateRange
-    if bullish_trendline and bullish_sr
+sr_bull = f_crossed_over()
+sr_bear = f_crossed_under()
+
+// Execute trades only within the specified date range
+if time >= start_date and time <= end_date
+    if trendline_bull and sr_bull
         strategy.entry("Long", strategy.long)
-    if bearish_trendline and bearish_sr
+    if trendline_bear and sr_bear
         strategy.entry("Short", strategy.short)
 
-//-----------------------------------------------------------------------------
-// Plots
-//-----------------------------------------------------------------------------
-plot(plotH, "Down Trendline", dnCss, 1, plot.style_linebr)
-plot(plotL, "Up Trendline", upCss, 1, plot.style_linebr)
+//-----------------------------------------------------------------------------}
+//Plots for visualization
+//-----------------------------------------------------------------------------{
+plot(plotH, 'Down Trendline', color.rgb(242, 54, 69), 1, plot.style_linebr)
+plot(plotL, 'Up Trendline', color.rgb(37, 193, 43), 1, plot.style_linebr)
 
-plotshape(bullish_trendline, "Bullish break", shape.labelup, location.belowbar, bullBreakCss, size=size.tiny)
-plotshape(bearish_trendline, "Bearish break", shape.labeldown, location.abovebar, bearBreakCss, size=size.tiny) 
+plotshape(trendline_bull, 'Bullish break', shape.triangleup, location.belowbar, color.rgb(37, 193, 43), size=size.tiny)
+plotshape(trendline_bear, 'Bearish break', shape.triangledown, location.abovebar, color.rgb(242, 54, 69), size=size.tiny) 
