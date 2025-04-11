@@ -20,7 +20,8 @@ upCss  = input.color (#25c12b,           'Up'           ,                       
 dnCss  = input.color (#f23645,          'Down'          ,                                       group=       "Colours"        ) 
 bullBreakCss = input.color (#25c12b, "Bullish Break Color",                                    group=       "Break Colors"   )
 bearBreakCss = input.color (#f23645, "Bearish Break Color",                                    group=       "Break Colors"   )
-width  = input.int(2, "Line Thickness", minval=1, maxval=4, group="Colours")
+width_float = input.float(2.0, "Line Thickness", minval=0.1, maxval=4.0, step=0.1, group="Colours")
+width = math.round(width_float)  // Convert float to int for line.new()
  
 //-----------------------------------------------------------------------------}
 //Variables
