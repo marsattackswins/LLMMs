@@ -6,7 +6,7 @@ maxnumpp = input.int(defval=20, title=' Maximum Number of Pivot', minval=5, maxv
 ChannelW = input.int(defval=10, title='Maximum Channel Width %', minval=1, group='Setup')
 maxnumsr = input.int(defval=6, title=' Maximum Number of S/R', minval=1, maxval=10, group='Setup')
 min_strength = input.int(defval=1, title=' Minimum Strength', minval=1, maxval=10, group='Setup')
-labelloc = input.int(defval=20, title='Label Location', group='Colors', tooltip='Positive numbers reference future bars, negative numbers reference histical bars')
+labelloc = input.int(defval=100, title='Label Location', group='Colors', tooltip='Positive numbers reference future bars, negative numbers reference histical bars')
 linestyle = input.string(defval='Dashed', title='Line Style', options=['Solid', 'Dotted', 'Dashed'], group='Colors')
 linewidth = input.int(defval=2, title='Line Width', minval=1, maxval=4, group='Colors')
 resistancecolor = input.color(defval=#c03a3a, title='Resistance Color', group='Colors')
