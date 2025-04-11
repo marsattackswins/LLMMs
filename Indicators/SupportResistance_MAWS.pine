@@ -1,5 +1,5 @@
 //@version=6
-indicator('SupportResistance_MAWS', 'SR_MAWS', overlay=true)
+indicator('SupportResistance_Maws', 'Ind - SR', overlay=true)
 prd = input.int(defval=20, title='Pivot Period', minval=4, maxval=30, group='Setup')
 ppsrc = input.string(defval='High/Low', title='Source', options=['High/Low', 'Close/Open'], group='Setup')
 maxnumpp = input.int(defval=20, title=' Maximum Number of Pivot', minval=5, maxval=100, group='Setup')

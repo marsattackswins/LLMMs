@@ -1,5 +1,5 @@
 //@version=6
-indicator("TrendLines_MAWS", shorttitle= "TL_MAWS", max_lines_count = 500, max_labels_count = 500, overlay = true)
+indicator("TrendLines_Maws", shorttitle= "Ind - TL", max_lines_count = 500, max_labels_count = 500, overlay = true)
 
 //------------------------------------------------------------------------------
 //Settings
@@ -157,7 +157,7 @@ plot(plotL, 'Up Trendline'
 plotshape(
   bs_H > count and srcBl > upper and srcBl[1] <= upper[1]
   , 'Bullish break'
-  , shape.labelup 
+  , shape.triangleup 
   , location.belowbar
   , bullBreakCss
   , size = size.tiny)
@@ -165,7 +165,7 @@ plotshape(
 plotshape(
   bs_L > count and srcBr < lower and srcBr[1] >= lower[1]
   , 'Bearish break'
-  , shape.labeldown 
+  , shape.triangledown 
   , location.abovebar
   , bearBreakCss
   , size = size.tiny)

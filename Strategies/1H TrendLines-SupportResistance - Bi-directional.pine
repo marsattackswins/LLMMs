@@ -1,5 +1,5 @@
 //@version=6
-strategy("TrendlinesSR_Strategy", shorttitle="TLSR", overlay=true, max_lines_count=500, max_labels_count=500, default_qty_type=strategy.percent_of_equity, default_qty_value=100, initial_capital=10000, currency=currency.NONE)
+strategy("1H Trendlines/SupportResistance - Bi-directional", shorttitle="St - 1H TL/SR - Long/Short", overlay=true, max_lines_count=500, max_labels_count=500, default_qty_type=strategy.percent_of_equity, default_qty_value=100, initial_capital=10000, currency=currency.NONE)
 
 // Date Range Inputs
 startDate = input.time(timestamp("2022-01-01"), "Start Date")
@@ -262,5 +262,5 @@ if inDateRange
 plot(plotH, "Down Trendline", dnCss, 1, plot.style_linebr)
 plot(plotL, "Up Trendline", upCss, 1, plot.style_linebr)
 
-plotshape(bullish_trendline, "Bullish break", shape.labelup, location.belowbar, bullBreakCss, size=size.tiny)
-plotshape(bearish_trendline, "Bearish break", shape.labeldown, location.abovebar, bearBreakCss, size=size.tiny) 
+plotshape(bullish_trendline, "Bullish break", shape.triangleup, location.belowbar, bullBreakCss, size=size.tiny)
+plotshape(bearish_trendline, "Bearish break", shape.triangledown, location.abovebar, bearBreakCss, size=size.tiny) 
