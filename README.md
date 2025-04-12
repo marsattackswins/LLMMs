@@ -45,7 +45,7 @@ Your contributions make this resource better! Here's how you can participate in 
 ## Resources
 
 ### Official Sources
-- [Official PineScript Documentation](https://www.tradingview.com/pine-script-docs/en/v6/Introduction.html)
+- [Official PineScript Documentation](https://www.tradingview.com/pine-script-docs/welcome/)
 - [TradingView Pine Script Reference](https://www.tradingview.com/pine-script-reference/v6/)
 - [PineScript Chat Community](https://www.tradingview.com/chat/#pine_script)
 
