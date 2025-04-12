@@ -14,7 +14,7 @@ count  = input.int   (    3    ,       'Minimal bars'     ,         minval =    
                                                           ,         tooltip=       'Uninterrupted Trendline for at least x bars') 
 showA  = input.bool  (  true   ,       'show Angles'                                            , group=        "Angles"        )
 ratio  = input.float (    3    ,     'Ratio X-Y axis'     ,           step =0.1                 , group=        "Angles"        )
-anglA  = input.float (    0.1  ,'Only Trendlines between:',         minval =0.1, inline= 'angle', group=        "Angles"        ) 
+anglA  = input.float (    2  ,'Only Trendlines between:',         minval =0.1, inline= 'angle', group=        "Angles"        ) 
 anglB  = input.float (   90    ,           ' - '          ,         minval =0.1, inline= 'angle', group=        "Angles"        ) 
 upCss  = input.color (#25c12b,           'Up'           ,                                       group=       "Colours"        ) 
 dnCss  = input.color (#f23645,          'Down'          ,                                       group=       "Colours"        ) 
