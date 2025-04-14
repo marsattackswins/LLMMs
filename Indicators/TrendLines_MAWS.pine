@@ -7,8 +7,8 @@ indicator("TrendLines_Maws", shorttitle= "Ind - TL", max_lines_count = 500, max_
 NN     = "Disabled"
 AB     = "Point A - Point B"
 AC     = "Point A - Current bar"
-length = input.int   (   50    ,                                    minval =          2         , group=        "Swings"        )
-toggle = input.string(   NN    ,  'Check breaks between:' ,         options=  [  AB, AC, NN  ]  , group= "Trendline validation" )
+length = input.int   (   20    ,                                    minval =          2         , group=        "Swings"        )
+toggle = input.string(   AC    ,  'Check breaks between:' ,         options=  [  AB, AC, NN  ]  , group= "Trendline validation" )
 source = input.string( "close" ,     'source (breaks)'    ,         options=  ["close", "H/L"]  , group= "Trendline validation" )
 count  = input.int   (    3    ,       'Minimal bars'     ,         minval =          0         , group=   "Trendline breaks"   
                                                           ,         tooltip=       'Uninterrupted Trendline for at least x bars') 
