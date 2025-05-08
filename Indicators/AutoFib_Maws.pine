@@ -4,7 +4,7 @@ indicator("AutoFib_Maws", overlay=true)
 devTooltip = "Deviation is a multiplier that affects how much the price should deviate from the previous pivot in order for the bar to become a new pivot."
 depthTooltip = "The minimum number of bars that will be taken into account when calculating the indicator."
 // pivots threshold
-threshold_multiplier = input.float(title="Deviation", defval=3, minval=0, tooltip=devTooltip)
+threshold_multiplier = input.float(title="Deviation", defval=5, minval=0, tooltip=devTooltip)
 depth = input.int(title="Depth", defval=10, minval=2, tooltip=depthTooltip)
 reverse = input(false, "Reverse", display = display.data_window)
 var extendLeft = input(false, "Extend Left    |    Extend Right", inline = "Extend Lines")
