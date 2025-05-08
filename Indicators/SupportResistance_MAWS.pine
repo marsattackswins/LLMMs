@@ -1,9 +1,9 @@
 //@version=6
 indicator('SupportResistance_Maws', 'Ind - SR', overlay=true)
-prd = input.int(defval=20, title='Pivot Period', minval=4, maxval=30, group='Setup')
+prd = input.int(defval=5, title='Pivot Period', minval=4, maxval=30, group='Setup')
 ppsrc = input.string(defval='High/Low', title='Source', options=['High/Low', 'Close/Open'], group='Setup')
-maxnumpp = input.int(defval=10, title=' Maximum Number of Pivot', minval=5, maxval=100, group='Setup')
-ChannelW = input.int(defval=5, title='Maximum Channel Width %', minval=1, group='Setup')
+maxnumpp = input.int(defval=15, title=' Maximum Number of Pivot', minval=5, maxval=100, group='Setup')
+ChannelW = input.int(defval=2, title='Maximum Channel Width %', minval=1, group='Setup')
 maxnumsr = input.int(defval=10, title=' Maximum Number of S/R', minval=1, maxval=10, group='Setup')
 min_strength = input.int(defval=1, title=' Minimum Strength', minval=1, maxval=10, group='Setup')
 labelloc = input.int(defval=100, title='Label Location', group='Colors', tooltip='Positive numbers reference future bars, negative numbers reference histical bars')
